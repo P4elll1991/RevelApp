@@ -42,15 +42,17 @@ type EmployeePro struct {
 }
 
 func (c Staff) Give() revel.Result {
-	staff, err := GiveStaffPro()
+	EmployeeProvader := EmployeePro{}
+	staff, err := EmployeeProvader.GiveStaffPro()
 	if err != nil {
 		panic(err)
 	}
 	return c.RenderJSON(staff)
 }
 
-func GiveStaffPro() (staff []Employee, err error) {
-	staffPro, books, err := TakeStaff()
+func (EmployeePro) GiveStaffPro() (staff []Employee, err error) {
+	EmployeeMapper := Employee{}
+	staffPro, books, err := EmployeeMapper.TakeStaff()
 	fmt.Println(books)
 	if err != nil {
 		return nil, err
@@ -76,7 +78,7 @@ func GiveStaffPro() (staff []Employee, err error) {
 	return staff, nil
 }
 
-func TakeStaff() ([]EmployeePro, []BookOfEmployee, error) {
+func (Employee) TakeStaff() ([]EmployeePro, []BookOfEmployee, error) {
 	connStr := "user=postgres password=q dbname=library sslmode=disable"
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
@@ -84,7 +86,7 @@ func TakeStaff() ([]EmployeePro, []BookOfEmployee, error) {
 	}
 	defer db.Close()
 
-	connStr = "SELECT * FROM staff"
+	connStr = "SELECT * FROM staff 	WHERE id != 1"
 	rows, err := db.Query(connStr)
 	if err != nil {
 		return nil, nil, err

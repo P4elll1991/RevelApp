@@ -31,15 +31,17 @@ type BookAddPro struct {
 func (c Books) Add() revel.Result {
 	var bookAdd BookAdd
 	c.Params.BindJSON(&bookAdd)
+	bookProvaider := BookPro{}
 
-	err := AddBookPro(bookAdd)
+	err := bookProvaider.AddBookPro(bookAdd)
 	if err != nil {
 		fmt.Println(err)
 	}
 	return c.Render()
 }
 
-func AddBookPro(bookAdd BookAdd) (err error) {
+func (BookPro) AddBookPro(bookAdd BookAdd) (err error) {
+	booksMapper := Book{}
 	var book BookAddPro
 	book.Isbn = bookAdd.Isbn
 	book.BookName = bookAdd.BookName
@@ -48,14 +50,14 @@ func AddBookPro(bookAdd BookAdd) (err error) {
 	book.Year = bookAdd.Year
 	book.Employeeid = 1
 	book.Datestart = time.Now()
-	err = AddBook(book)
+	err = booksMapper.AddBook(book)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func AddBook(b BookAddPro) error {
+func (Book) AddBook(b BookAddPro) error {
 	connStr := "user=postgres password=q dbname=library sslmode=disable"
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {

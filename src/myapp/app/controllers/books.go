@@ -3,6 +3,7 @@ package controllers
 import (
 	"database/sql"
 	"fmt"
+	"strconv"
 	"time"
 
 	_ "github.com/lib/pq"
@@ -22,6 +23,7 @@ type BookPro struct {
 	Year       int
 	Status     string
 	Name       string
+	Cellnumber string
 	Employeeid int
 	Datestart  string
 	Datefinish string
@@ -36,19 +38,22 @@ type Book struct {
 	Year       int
 	Employeeid int
 	Name       string
+	Cellnumber int
 	Datestart  time.Time
 }
 
 func (c Books) Give() revel.Result {
-	allbooks, err := GiveBooksPro()
+	bookProvaider := BookPro{}
+	allbooks, err := bookProvaider.GiveBooksPro()
 	if err != nil {
 		panic(err)
 	}
 	return c.RenderJSON(allbooks)
 }
 
-func GiveBooksPro() (bookspro []BookPro, err error) {
-	books, err := TakeBooks()
+func (BookPro) GiveBooksPro() (bookspro []BookPro, err error) {
+	booksMapper := Book{}
+	books, err := booksMapper.TakeBooks()
 	if err != nil {
 		return nil, err
 	}
@@ -66,9 +71,11 @@ func GiveBooksPro() (bookspro []BookPro, err error) {
 			p.Employeeid = 0
 			p.Datestart = ""
 			p.Datefinish = ""
+			p.Cellnumber = ""
 		} else {
 			p.Status = "Нет в наличии"
 			p.Name = v.Name
+			p.Cellnumber = strconv.Itoa(v.Cellnumber)
 			p.Employeeid = v.Employeeid
 			p.Datestart = v.Datestart.Format("2006-01-02")
 			p.Datefinish = v.Datestart.AddDate(0, 0, 7).Format("2006-01-02")
@@ -78,7 +85,7 @@ func GiveBooksPro() (bookspro []BookPro, err error) {
 	}
 	return bookspro, nil
 }
-func TakeBooks() ([]Book, error) {
+func (Book) TakeBooks() ([]Book, error) {
 	// Открытие базы данных
 
 	connStr := "user=postgres password=q dbname=library sslmode=disable"
@@ -88,7 +95,7 @@ func TakeBooks() ([]Book, error) {
 	}
 	defer db.Close()
 
-	connStr = "SELECT books.id, books.isbn, books.bookname, books.autor, books.publisher, books.year, books.employeeid, books.datestart, staff.name FROM books LEFT JOIN staff ON books.employeeid = staff.id;"
+	connStr = "SELECT books.id, books.isbn, books.bookname, books.autor, books.publisher, books.year, books.employeeid, books.datestart, staff.name, staff.cellnumber FROM books LEFT JOIN staff ON books.employeeid = staff.id;"
 	rows, err := db.Query(connStr)
 	if err != nil {
 		return nil, err
@@ -98,7 +105,7 @@ func TakeBooks() ([]Book, error) {
 
 	for rows.Next() {
 		p := Book{}
-		err := rows.Scan(&p.Id, &p.Isbn, &p.BookName, &p.Autor, &p.Publisher, &p.Year, &p.Employeeid, &p.Datestart, &p.Name)
+		err := rows.Scan(&p.Id, &p.Isbn, &p.BookName, &p.Autor, &p.Publisher, &p.Year, &p.Employeeid, &p.Datestart, &p.Name, &p.Cellnumber)
 		if err != nil {
 			fmt.Println(err)
 			continue

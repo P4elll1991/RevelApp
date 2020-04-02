@@ -9,10 +9,11 @@ import (
 )
 
 func (c Staff) Update() revel.Result {
+	EmployeeProvader := EmployeePro{}
 	var empUpdate EmployeePro
 	c.Params.BindJSON(&empUpdate)
 
-	err := UpStaffPro(empUpdate)
+	err := EmployeeProvader.UpStaffPro(empUpdate)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -21,15 +22,16 @@ func (c Staff) Update() revel.Result {
 	return c.Render()
 }
 
-func UpStaffPro(staff EmployeePro) error {
-	err := UpStaff(staff)
+func (EmployeePro) UpStaffPro(staff EmployeePro) error {
+	EmployeeMapper := Employee{}
+	err := EmployeeMapper.UpStaff(staff)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func UpStaff(staff EmployeePro) error {
+func (Employee) UpStaff(staff EmployeePro) error {
 	connStr := "user=postgres password=q dbname=library sslmode=disable"
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {

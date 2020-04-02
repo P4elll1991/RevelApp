@@ -10,26 +10,28 @@ import (
 )
 
 func (c Books) Update() revel.Result {
+	bookProvaider := BookPro{}
 	var bookUpdete Book
 	c.Params.BindJSON(&bookUpdete)
 
-	err := UpdateBookPro(bookUpdete)
+	err := bookProvaider.UpdateBookPro(bookUpdete)
 	if err != nil {
 		fmt.Println(err)
 	}
 	return c.Render()
 }
 
-func UpdateBookPro(bookUpdate Book) error {
+func (BookPro) UpdateBookPro(bookUpdate Book) error {
+	booksMapper := Book{}
 	bookUpdate.Datestart = time.Now()
-	err := UpdateBook(bookUpdate)
+	err := booksMapper.UpdateBook(bookUpdate)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func UpdateBook(b Book) error {
+func (Book) UpdateBook(b Book) error {
 	connStr := "user=postgres password=q dbname=library sslmode=disable"
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {

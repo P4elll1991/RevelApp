@@ -11,21 +11,22 @@ import (
 )
 
 func (c Journal) Add() revel.Result {
-	var event EventPro
+	journalProvaider := EventPro{}
+	var event Event
 	c.Params.BindJSON(&event)
 
-	err := AddEventPro(event)
+	err := journalProvaider.AddEventPro(event)
 	if err != nil {
 		fmt.Println(err)
 	}
 	return c.Render()
 }
 
-func AddEventPro(event EventPro) error {
-
+func (EventPro) AddEventPro(event Event) error {
+	journalMapper := Event{}
 	event.DateEvent = time.Now()
 
-	err := AddEvent(event)
+	err := journalMapper.AddEvent(event)
 	if err != nil {
 		return err
 	}
@@ -33,7 +34,7 @@ func AddEventPro(event EventPro) error {
 	return nil
 }
 
-func AddEvent(event EventPro) error {
+func (Event) AddEvent(event Event) error {
 	connStr := "user=postgres password=q dbname=library sslmode=disable"
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
@@ -43,8 +44,8 @@ func AddEvent(event EventPro) error {
 
 	// Добавить елемент
 
-	connStr = "insert into journal (event, bookid, employeeid, dateevent) values ( $1, $2, $3, $4)"
-	_, err = db.Exec(connStr, event.Event, event.BookId, event.EmployeeId, event.DateEvent)
+	connStr = "insert into journal (event, bookid, isbn, BookName, employeeid, Name, Cellnumber, dateevent) values ( $1, $2, $3, $4, $5, $6, $7, $8)"
+	_, err = db.Exec(connStr, event.Event, event.BookId, event.Isbn, event.BookName, event.EmployeeId, event.Name, event.Cellnumber, event.DateEvent)
 
 	if err != nil {
 		return err

@@ -16,10 +16,11 @@ type IdStaff struct {
 }
 
 func (c Staff) Delete() revel.Result {
+	EmployeeProvader := EmployeePro{}
 	var IdArr IdStaff
 	IdArr.IdEmp = c.Params.Query.Get("id")
 	if IdArr.IdEmp != "" {
-		err := StaffDeletePro(IdArr)
+		err := EmployeeProvader.StaffDeletePro(IdArr)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -27,7 +28,7 @@ func (c Staff) Delete() revel.Result {
 	} else {
 		c.Params.BindJSON(&IdArr.IdStaff)
 
-		err := StaffDeletePro(IdArr)
+		err := EmployeeProvader.StaffDeletePro(IdArr)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -36,19 +37,20 @@ func (c Staff) Delete() revel.Result {
 	return c.Render()
 }
 
-func StaffDeletePro(staff IdStaff) error {
+func (EmployeePro) StaffDeletePro(staff IdStaff) error {
+	EmployeeMapper := Employee{}
 	if staff.IdEmp != "" {
 		Id, err := strconv.Atoi(staff.IdEmp)
 		if err != nil {
 			return err
 		}
-		err = StaffDelete1(Id)
+		err = EmployeeMapper.StaffDeleteOne(Id)
 		if err != nil {
 			return err
 		}
 		return nil
 	} else {
-		err := StaffDelete2(staff.IdStaff)
+		err := EmployeeMapper.StaffDeleteSome(staff.IdStaff)
 		if err != nil {
 			return err
 		}
@@ -56,7 +58,7 @@ func StaffDeletePro(staff IdStaff) error {
 	}
 }
 
-func StaffDelete2(s []int) error {
+func (Employee) StaffDeleteSome(s []int) error {
 	connStr := "user=postgres password=q dbname=library sslmode=disable"
 	db, err := sql.Open("postgres", connStr)
 	connStr = "delete from staff where id = $1"
@@ -75,7 +77,7 @@ func StaffDelete2(s []int) error {
 	return nil
 }
 
-func StaffDelete1(id int) error {
+func (Employee) StaffDeleteOne(id int) error {
 	// Открытие базы данных
 
 	connStr := "user=postgres password=q dbname=library sslmode=disable"

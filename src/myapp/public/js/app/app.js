@@ -33,20 +33,6 @@ function run(){
   webix.ui(BookTab.initWindow());
   webix.ui(StaffTab.initWindow());
   
-  webix.ajax().get("/Staff/Give").then(function(data){
-    var staffOptions =[];
-    data = data.json();
-    data.forEach(function(val){
-      var option = {};
-      option.id = val.Id;
-      option.value = val.Name + " " + val.Cellnumber;
-      staffOptions.push(option);
-      
-    });
-    console.log(staffOptions);
-    $$("options").parse(staffOptions);
-    return staffOptions;
-});
   BookTab.editeEvents(BookTab);
   StaffTab.editeEvents(StaffTab);
   JournalTab.editeEvents(JournalTab);

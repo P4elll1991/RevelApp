@@ -16,10 +16,11 @@ type IdBooks struct {
 }
 
 func (c Books) Delete() revel.Result {
+	bookProvaider := BookPro{}
 	var IdArr IdBooks
 	IdArr.IdBook = c.Params.Query.Get("id")
 	if IdArr.IdBook != "" {
-		err := BookDeletePro(IdArr)
+		err := bookProvaider.BookDeletePro(IdArr)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -27,7 +28,7 @@ func (c Books) Delete() revel.Result {
 	} else {
 		c.Params.BindJSON(&IdArr.IdBooks)
 
-		err := BookDeletePro(IdArr)
+		err := bookProvaider.BookDeletePro(IdArr)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -36,19 +37,20 @@ func (c Books) Delete() revel.Result {
 	return c.Render()
 }
 
-func BookDeletePro(books IdBooks) error {
+func (BookPro) BookDeletePro(books IdBooks) error {
+	booksMapper := Book{}
 	if books.IdBook != "" {
 		Id, err := strconv.Atoi(books.IdBook)
 		if err != nil {
 			return err
 		}
-		err = BookDelete1(Id)
+		err = booksMapper.BookDeleteOne(Id)
 		if err != nil {
 			return err
 		}
 		return nil
 	} else {
-		err := BookDelete2(books.IdBooks)
+		err := booksMapper.BookDeleteSome(books.IdBooks)
 		if err != nil {
 			return err
 		}
@@ -57,7 +59,7 @@ func BookDeletePro(books IdBooks) error {
 
 }
 
-func BookDelete2(b []int) error {
+func (Book) BookDeleteSome(b []int) error {
 	connStr := "user=postgres password=q dbname=library sslmode=disable"
 	db, err := sql.Open("postgres", connStr)
 	connStr = "delete from books where id = $1"
@@ -76,7 +78,7 @@ func BookDelete2(b []int) error {
 	return nil
 }
 
-func BookDelete1(id int) error {
+func (Book) BookDeleteOne(id int) error {
 	// Открытие базы данных
 
 	connStr := "user=postgres password=q dbname=library sslmode=disable"

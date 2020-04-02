@@ -133,8 +133,17 @@ class staffTab{
     var item = list.getSelectedItem();
     
     if (!Array.isArray(item)) {
+
       if (item_id){
-        webix.confirm({
+        if (item.BooksStr != "") {
+          webix.confirm({
+            text: "Нельзя удалить сотрудника имеющего задолжность перед библиотекой", 
+            ok: "OK",
+          }).then(function(){
+            return
+          });
+        } else {
+          webix.confirm({
             text: "Вы действительно хотите удалить сотрудника",
             cancel: "Нет", 
             ok: "Да",
@@ -142,14 +151,27 @@ class staffTab{
             list.remove(item_id);
             webix.ajax().post("/Staff/Delete?id="+item.Id);
           });
+        }
       } 
-    }else {
+    }
+    else {
       var IdList = [];
+      var i = 0; 
       item.forEach(function(val){
-        IdList.push(val.Id);
-        console.log(IdList);
+        i++;
+        if (val.Status != "") {
+          webix.confirm({
+            text: "Нельзя удалить сотрудника имеющего задолжность перед библиотекой", 
+            ok: "OK",
+          }).then(function(){
+            return
+          });
+        } else {
+          IdList.push(val.Id);
+        }
+        
       });
-      if (item_id){
+      if (item_id && (IdList.length == i)){
         webix.confirm({
             text: "Вы действительно хотите удалить сотрудников?",
             cancel: "Нет", 

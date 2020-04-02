@@ -14,9 +14,8 @@ class windowBook {
         "Year":webix.rules.isNumber,
             };
     
-    getWindow(staffOptions){
+    getWindow(){
       
-        console.log(staffOptions);
         this.window = {
             view:"window",
             id:"windowBook",
@@ -60,4 +59,22 @@ class windowBook {
 
         return this.window;
     }
+
+    optionsBook() {
+      webix.ajax().get("/Staff/Give").then(function(data){
+        var staffOptions =[];
+        data = data.json();
+        data.forEach(function(val){
+          var option = {};
+          option.id = val.Id;
+          option.value = val.Name + " " + val.Cellnumber;
+          staffOptions.push(option);
+          
+        });
+        console.log(staffOptions);
+        $$("options").parse(staffOptions);
+        return staffOptions;
+    });
+    }
 }
+

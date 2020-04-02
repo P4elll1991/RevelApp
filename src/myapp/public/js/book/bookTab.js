@@ -22,6 +22,7 @@ class bookTab {
         { id:"Year",  header:"Год", adjust: true, sort: "int",},
         { id:"Status",  header:"Статус", width:150, sort: "string"},
         { id:"Name",  header:"Сотрудник", width:200, sort: "string"},
+        { id:"Cellnumber",  header:"Номер телефона", width:200, sort: "string"},
         { id:"Datestart",  header:"Дата выдачи", adjust: true, format:webix.i18n.dateFormatStr, sort: "date"},
         { id:"Datefinish",  header:"Дата сдачи", adjust: true, format:webix.i18n.dateFormatStr, sort: "date"}
                     ];
@@ -62,11 +63,8 @@ class bookTab {
     }
 
     initWindow() {
-      var count = $$("bookTable").getVisibleCount();
-      console.log(count);
-      this.staffOptions = [];
       this.up = new windowBook();
-      this.window = this.up.getWindow(this.staffOptions);
+      this.window = this.up.getWindow();
       return this.window;
     }
 
@@ -75,6 +73,8 @@ class bookTab {
     }
 
     editeEvents(parent){
+      var options = new windowBook();
+      options.optionsBook();
       $$("delete").attachEvent("onItemClick", function(){
         parent.delete();
       });
@@ -160,9 +160,19 @@ class bookTab {
     var list = $$("bookTable");
     var item_id = list.getSelectedId();
     var item = list.getSelectedItem();
+    console.log(item.Status);
+    
     if (!Array.isArray(item)) {
       if (item_id){
-        webix.confirm({
+        if (item.Status == "Нет в наличии") {
+          webix.confirm({
+            text: "Нельзя удалить книгу пока она не будет сдана", 
+            ok: "OK",
+          }).then(function(){
+            return
+          });
+        } else {
+          webix.confirm({
             text: "Вы действительно хотите удалить книу?",
             cancel: "Нет", 
             ok: "Да",
@@ -170,13 +180,28 @@ class bookTab {
             list.remove(item_id);
             webix.ajax().post("/Books/Delete?id="+item.Id);
           });
+        } 
       }
-    } else {
+    } 
+    else {
       var IdList = [];
+      var i = 0; 
       item.forEach(function(val){
-        IdList.push(val.Id);
+        i++;
+        if (val.Status == "Нет в наличии") {
+          webix.confirm({
+            text: "Нельзя удалить книгу пока она не будет сдана.", 
+            ok: "OK",
+          }).then(function(){
+            return
+          });
+        } else {
+          IdList.push(val.Id);
+        }
+        
       });
-      if (item_id){
+      if (item_id && (IdList.length == i)){
+        console.log(check);
         webix.confirm({
             text: "Вы действительно хотите удалить книги?",
             cancel: "Нет", 
@@ -258,6 +283,7 @@ class bookTab {
         "Content-type":"application/json"
     }).post("/Books/Add", JSON.stringify(this.postData));
 
+
      } else {
       if (item_data.Status) {
         item_data.Employeeid = Number(item_data.Name);
@@ -294,6 +320,14 @@ class bookTab {
 
         }
       }
+
+        $$("staffTable").eachRow(function(row){
+          var record = $$("staffTable").getItem(row);
+          if (record.Id == item_data.Name){
+            item_data.Cellnumber = record.Cellnumber;
+            item_data.Name = record.Name;
+          }
+      });
       
         console.log(item_data);
         if (item.Status != item_data.Status){
@@ -302,7 +336,11 @@ class bookTab {
             this.postDataEvent = {
               Event: "Возвращено",
               BookId :Number(item_data.Id),
+              BookName: item_data.BookName,
+              Isbn: Number(item_data.Isbn),
               EmployeeId: Number(item.Employeeid),
+              Name: item.Name,
+              Cellnumber: Number(item.Cellnumber)
             };
             console.log(this.postDataEvent)
           } else {
@@ -310,7 +348,11 @@ class bookTab {
             this.postDataEvent = {
               Event: "Выдано",
               BookId :Number(item_data.Id),
+              BookName: item_data.BookName,
+              Isbn: Number(item_data.Isbn),
+              Name: item_data.Name,
               EmployeeId: Number(item_data.Employeeid),
+              Cellnumber: Number(item_data.Cellnumber),
             };
             console.log(this.postDataEvent)
           }
@@ -322,13 +364,6 @@ class bookTab {
 
 
         } 
-
-        $$("staffTable").eachRow(function(row){
-            var record = $$("staffTable").getItem(row);
-            if (record.Id == item_data.Name){
-              item_data.Name = record.Name + " " + record.Cellnumber;
-            }
-        });
         
           console.log(this.postData);
           webix.ajax().headers({
