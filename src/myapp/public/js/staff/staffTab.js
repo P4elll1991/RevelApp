@@ -250,8 +250,23 @@ class staffTab{
       console.log(this.postData);
       webix.ajax().headers({
         "Content-type":"application/json"
-        }).post("/Staff/Update", JSON.stringify(this.postData));
-       table.updateItem(item_data.id, item_data);
+        }).post("/Staff/Update", JSON.stringify(this.postData)).then(function(data){
+          data = data.json();
+          console.log(data);
+          data.Books.forEach(function(val){
+            val.id = val.Id;
+          });
+            $$("bookTable").parse(data.Books);
+            data.Staff.forEach(function(val){
+              val.id = val.Id;
+              val.BooksStr = "";
+              val.Books.forEach(function(v){
+                val.BooksStr += "<p style = 'padding: 0px; margin: 0px; height: 25px;'> ISBN : " + v.Isbn + ", " + v.BookName + ", " + v.Datestart + " - " + v.Datefinish + ";</p>";
+              });
+            });
+            $$("staffTable").parse(data.Staff);
+        });
+       //table.updateItem(item_data.id, item_data);
        
      }
      

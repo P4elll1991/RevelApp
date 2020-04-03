@@ -173,12 +173,18 @@ class bookTab {
           });
         } else {
           webix.confirm({
-            text: "Вы действительно хотите удалить книу?",
+            text: "Вы действительно хотите удалить книгу?",
             cancel: "Нет", 
             ok: "Да",
           }).then(function(){
             list.remove(item_id);
-            webix.ajax().post("/Books/Delete?id="+item.Id);
+            webix.ajax().post("/Books/Delete?id="+item.Id).then(function(data){
+              data = data.json();
+              data.forEach(function(val){
+                val.id = val.Id;
+              });
+              $$("bookTable").parse(data);
+              });
           });
         } 
       }
@@ -201,17 +207,24 @@ class bookTab {
         
       });
       if (item_id && (IdList.length == i)){
-        console.log(check);
         webix.confirm({
             text: "Вы действительно хотите удалить книги?",
             cancel: "Нет", 
             ok: "Да",
           }).then(function(){
-            list.remove(item_id);
+            IdList.forEach(function(val){
+              list.remove(val);
+            });
             console.log(IdList);
             webix.ajax().headers({
               "Content-type":"application/json"
-          }).post("/Books/Delete", JSON.stringify(IdList));
+          }).post("/Books/Delete", JSON.stringify(IdList)).then(function(data){
+            data = data.json();
+            data.forEach(function(val){
+              val.id = val.Id;
+            });
+            $$("bookTable").parse(data);
+            });
           });
       }
     }
@@ -220,17 +233,20 @@ class bookTab {
   afterSelect() {
       var item = $$("bookTable").getSelectedItem();
       console.log(item);
+      var x = item.Name;
+      item.Name = item.Employeeid;
       $$("formBook").setValues(item);
       $$("formBook").setValues(item);
       if (Array.isArray(item)) {
         item.forEach(function(val){
           val.ch1 = 1;
+          item.Name = x;
           $$("bookTable").updateItem(val.id, item);
         });
         return;
       }
       item.ch1 = 1;
-      
+      item.Name = x;
       $$("bookTable").updateItem(item.id, item);
     }
 
@@ -269,7 +285,6 @@ class bookTab {
         return
       }
       item_data["Status"] = "В наличии";
-      table.add(item_data);
       this.postData = {
         action:"info",
         isbn:Number(item_data.Isbn), 
@@ -281,7 +296,13 @@ class bookTab {
 
       webix.ajax().headers({
         "Content-type":"application/json"
-    }).post("/Books/Add", JSON.stringify(this.postData));
+    }).post("/Books/Add", JSON.stringify(this.postData)).then(function(data){
+			data = data.json();
+			data.forEach(function(val){
+				val.id = val.Id;
+			});
+      $$("bookTable").parse(data);
+		  });
 
 
      } else {
@@ -331,6 +352,7 @@ class bookTab {
       
         console.log(item_data);
         if (item.Status != item_data.Status){
+          console.log("нет");
           if(item_data.Status == "В наличии"){
             console.log("Возвращено")
             this.postDataEvent = {
@@ -368,9 +390,25 @@ class bookTab {
           console.log(this.postData);
           webix.ajax().headers({
             "Content-type":"application/json"
-        }).post("/Books/Update", JSON.stringify(this.postData));
+        }).post("/Books/Update", JSON.stringify(this.postData)).then(function(data){
+          data = data.json();
+          console.log(data);
+          data.Books.forEach(function(val){
+            val.id = val.Id;
+          });
+            $$("bookTable").parse(data.Books);
+            data.Staff.forEach(function(val){
+              val.id = val.Id;
+              val.BooksStr = "";
+              val.Books.forEach(function(v){
+                val.BooksStr += "<p style = 'padding: 0px; margin: 0px; height: 25px;'> ISBN : " + v.Isbn + ", " + v.BookName + ", " + v.Datestart + " - " + v.Datefinish + ";</p>";
+              });
+            });
+            $$("staffTable").parse(data.Staff);
+            $$("journalTable").parse(data.Journal);
+        });
 
-       table.updateItem(item_data.id, item_data);
+       //table.updateItem(item_data.id, item_data);
      }
      
      
