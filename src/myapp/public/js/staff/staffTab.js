@@ -131,7 +131,7 @@ class staffTab{
     var list = $$("staffTable");
     var item_id = list.getSelectedId();
     var item = list.getSelectedItem();
-    
+    var IdList = [];
     if (!Array.isArray(item)) {
 
       if (item_id){
@@ -149,17 +149,20 @@ class staffTab{
             ok: "Да",
           }).then(function(){
             list.remove(item_id);
-            webix.ajax().post("/Staff/Delete?id="+item.Id);
+            IdList.push(item.Id);
+            webix.ajax().headers({
+              "Content-type":"application/json"
+          }).post("/Staff/Delete", JSON.stringify(IdList));
           });
         }
       } 
     }
     else {
-      var IdList = [];
+      
       var i = 0; 
       item.forEach(function(val){
         i++;
-        if (val.Status != "") {
+        if (val.BooksStr != "") {
           webix.confirm({
             text: "Нельзя удалить сотрудника имеющего задолжность перед библиотекой", 
             ok: "OK",

@@ -14,15 +14,22 @@ function init() {
   var y = StaffTab.getView();
   var z = JournalTab.getView();
   
- viewer = {  
-  view:"tabview",
-  cells:[
-    { id: "booksView", header:"Книги", body: x,},
-    { id: "staffView", header:"Сотрудники", body: y,},
-    { id: "journal", header:"Журнал", body: z }
-  ],
-  multiview:{animate:true}
-};
+ viewer = {
+ rows:[
+   {view: "button", css:"webix_primary", id:"exit", inputWidth:100,  value:"Выход", click:function(id,event){
+    webix.ajax().get("/Exite").then(function(){
+    window.location.reload();
+    });
+}},
+  { view:"tabview",
+    cells:[
+      { id: "booksView", header:"Книги", body: x,},
+      { id: "staffView", header:"Сотрудники", body: y,},
+      { id: "journal", header:"Журнал", body: z }
+    ],
+    multiview:{animate:true}
+  },
+ ]}
 return viewer
 }
 

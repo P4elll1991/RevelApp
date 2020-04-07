@@ -15,7 +15,7 @@ class journalTab {
       { id:"Event",    header:"Событие",  sort: "string",  adjust:true,},
       { id:"BookNameJ",   header:"Название",   sort: "string",  adjust:true,},
       { id:"IsbnJ",  header:"ISBN",   sort: "int",  adjust:true,},
-      { id:"DateEvent",  header:"Дата события",  format:webix.i18n.dateFormatStr, sort: "date",  adjust:true,},
+      { id:"DateEvent",  header:"Дата события",  format:webix.Date.dateToStr("%d.%m.%Y"), sort: "date",  adjust:true,},
       { id:"NameJ",  header:"ФИО",   sort: "string",  adjust:true,},
       { id:"CellnumberJ",  header:"Телефон",   sort: "string",  adjust:true,},
       ];
@@ -74,6 +74,18 @@ class journalTab {
       if (!item) return;
       var item_id = item.id;
       var focusId = item.BookId;
+      var flagCheck = false;
+      $$("bookTable").eachRow(function(row){
+        var record = $$("bookTable").getItem(row)
+        if (focusId == record.Id) {
+          flagCheck = true
+        }
+      });
+      if (!flagCheck) {
+        webix.message({ type:"error", text:"Книга была удален" });
+        return
+      };
+
       if (!focusId) return;
 
       $$("journalTable").unselect(item_id);
@@ -90,7 +102,17 @@ class journalTab {
       if (!item) return;
       var item_id = item.id;
       var focusId = item.EmployeeId;
-      if (!focusId) return;
+      var flagCheck = false;
+      $$("staffTable").eachRow(function(row){
+        var record = $$("staffTable").getItem(row)
+        if (focusId == record.Id) {
+          flagCheck = true
+        }
+      });
+      if (!flagCheck) {
+        webix.message({ type:"error", text:"Сотрудник был удален" });
+        return
+      };
 
       $$("journalTable").unselect(item_id);
       $$("staffTable").unselectAll();

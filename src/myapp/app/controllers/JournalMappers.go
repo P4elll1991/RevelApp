@@ -29,7 +29,7 @@ func (m JournalMapper) TakeJournal() ([]Event, error) {
 
 	for rows.Next() {
 		p := Event{}
-		err := rows.Scan(&p.Id, &p.Event, &p.BookId, &p.EmployeeId, &p.DateEvent, &p.Isbn, &p.BookName, &p.Name, &p.Cellnumber)
+		err := rows.Scan(&p.Id, &p.Event, &p.BookId, &p.EmployeeId, &p.DateEvent, &p.IsbnJ, &p.BookNameJ, &p.NameJ, &p.CellnumberJ)
 		if err != nil {
 			return nil, err
 		}
@@ -52,7 +52,7 @@ func (m JournalMapper) AddEvent(event Event) error {
 	// Добавить елемент
 
 	connStr = "insert into journal (event, bookid, isbn, BookName, employeeid, Name, Cellnumber, dateevent) values ( $1, $2, $3, $4, $5, $6, $7, $8)"
-	_, err = m.db.Exec(connStr, event.Event, event.BookId, event.Isbn, event.BookName, event.EmployeeId, event.Name, event.Cellnumber, event.DateEvent)
+	_, err = m.db.Exec(connStr, event.Event, event.BookId, event.IsbnJ, event.BookNameJ, event.EmployeeId, event.NameJ, event.CellnumberJ, event.DateEvent)
 
 	if err != nil {
 		return err

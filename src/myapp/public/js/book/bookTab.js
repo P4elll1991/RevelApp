@@ -23,8 +23,8 @@ class bookTab {
         { id:"Status",  header:"Статус", width:150, sort: "string"},
         { id:"Name",  header:"Сотрудник", width:200, sort: "string"},
         { id:"Cellnumber",  header:"Номер телефона", width:200, sort: "string"},
-        { id:"Datestart",  header:"Дата выдачи", adjust: true, format:webix.i18n.dateFormatStr, sort: "date"},
-        { id:"Datefinish",  header:"Дата сдачи", adjust: true, format:webix.i18n.dateFormatStr, sort: "date"}
+        { id:"Datestart",  header:"Дата выдачи", adjust: true, format:webix.Date.dateToStr("%d.%m.%Y"), sort: "date"},
+        { id:"Datefinish",  header:"Дата сдачи", adjust: true, format:webix.Date.dateToStr("%d.%m.%Y"), sort: "date"}
                     ];
   
     init() {
@@ -161,6 +161,7 @@ class bookTab {
     var item_id = list.getSelectedId();
     var item = list.getSelectedItem();
     console.log(item.Status);
+    var IdList = []; 
     
     if (!Array.isArray(item)) {
       if (item_id){
@@ -178,10 +179,28 @@ class bookTab {
             ok: "Да",
           }).then(function(){
             list.remove(item_id);
-            webix.ajax().post("/Books/Delete?id="+item.Id).then(function(data){
+            IdList.push(item.Id);
+            console.log(IdList);
+            webix.ajax().headers({
+              "Content-type":"application/json"
+              }).post("/Books/Delete", JSON.stringify(IdList)).then(function(data){
               data = data.json();
               data.forEach(function(val){
                 val.id = val.Id;
+                  if (val.Employeeid == 1){
+                    val.Status = "В наличии";
+                    val.Employeei = 0;
+                    val.Name = "";
+                    val.Cellnumber = null;
+                    val.Datestart = null;
+                    val.Datefinish = null;
+                  } else {
+                    val.Status = "Нет в наличии";
+                    var Datestart = val.Datestart.slice(0, 10);
+                    val.Datestart = new Date(Datestart);
+                    val.Datefinish = new Date(Datestart);
+                    val.Datefinish.setDate(val.Datefinish.getDate() + 7);
+                  }
               });
               $$("bookTable").parse(data);
               });
@@ -190,7 +209,6 @@ class bookTab {
       }
     } 
     else {
-      var IdList = [];
       var i = 0; 
       item.forEach(function(val){
         i++;
@@ -218,10 +236,24 @@ class bookTab {
             console.log(IdList);
             webix.ajax().headers({
               "Content-type":"application/json"
-          }).post("/Books/Delete", JSON.stringify(IdList)).then(function(data){
-            data = data.json();
-            data.forEach(function(val){
+              }).post("/Books/Delete", JSON.stringify(IdList)).then(function(data){
+             data = data.json();
+             data.forEach(function(val){
               val.id = val.Id;
+                  if (val.Employeeid == 1){
+                    val.Status = "В наличии";
+                    val.Employeei = 0;
+                    val.Name = "";
+                    val.Cellnumber = null;
+                    val.Datestart = null;
+                    val.Datefinish = null;
+                  } else {
+                    val.Status = "Нет в наличии";
+                    var Datestart = val.Datestart.slice(0, 10);
+                    val.Datestart = new Date(Datestart);
+                    val.Datefinish = new Date(Datestart);
+                    val.Datefinish.setDate(val.Datefinish.getDate() + 7);
+                  }
             });
             $$("bookTable").parse(data);
             });
@@ -300,6 +332,20 @@ class bookTab {
 			data = data.json();
 			data.forEach(function(val){
 				val.id = val.Id;
+				if (val.Employeeid == 1){
+					val.Status = "В наличии";
+					val.Employeei = 0;
+					val.Name = "";
+					val.Cellnumber = null;
+          val.Datestart = null;
+          val.Datefinish = null;
+				} else {
+					val.Status = "Нет в наличии";
+					var Datestart = val.Datestart.slice(0, 10);
+					val.Datestart = new Date(Datestart);
+					val.Datefinish = new Date(Datestart);
+					val.Datefinish.setDate(val.Datefinish.getDate() + 7);
+				}
 			});
       $$("bookTable").parse(data);
 		  });
@@ -394,7 +440,21 @@ class bookTab {
           data = data.json();
           console.log(data);
           data.Books.forEach(function(val){
-            val.id = val.Id;
+                val.id = val.Id;
+            if (val.Employeeid == 1){
+              val.Status = "В наличии";
+              val.Employeei = 0;
+              val.Name = "";
+              val.Cellnumber = null;
+              val.Datestart = null;
+              val.Datefinish = null;
+            } else {
+              val.Status = "Нет в наличии";
+              var Datestart = val.Datestart.slice(0, 10);
+              val.Datestart = new Date(Datestart);
+              val.Datefinish = new Date(Datestart);
+              val.Datefinish.setDate(val.Datefinish.getDate() + 7);
+				}
           });
             $$("bookTable").parse(data.Books);
             data.Staff.forEach(function(val){
@@ -407,8 +467,6 @@ class bookTab {
             $$("staffTable").parse(data.Staff);
             $$("journalTable").parse(data.Journal);
         });
-
-       //table.updateItem(item_data.id, item_data);
      }
      
      

@@ -1,6 +1,10 @@
 package app
 
 import (
+	"database/sql"
+
+	_ "github.com/lib/pq"
+
 	"github.com/revel/revel"
 )
 
@@ -11,6 +15,18 @@ var (
 	// BuildTime revel app build-time (ldflags)
 	BuildTime string
 )
+
+var DB *sql.DB
+
+func InitDB() (*sql.DB, error) {
+	connStr := "user=postgres password=q dbname=library sslmode=disable"
+	var err error
+	if DB == nil {
+		DB, err = sql.Open("postgres", connStr)
+	}
+
+	return DB, err
+}
 
 func init() {
 	// Filters is the default set of global filters.

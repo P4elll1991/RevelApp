@@ -2,14 +2,13 @@ package controllers
 
 import (
 	"fmt"
-	"strconv"
 )
 
 type StaffProvaider struct {
 	mapper StaffMapper
 }
 
-func (pr StaffProvaider) AddStaffPro(staff EmployeePro) error {
+func (pr StaffProvaider) AddStaffPro(staff Employee) error {
 
 	err := pr.mapper.AddStaff(staff)
 	if err != nil {
@@ -27,7 +26,7 @@ func (pr StaffProvaider) GiveStaffPro() (staff []Employee, err error) {
 	}
 	for _, val := range staffPro {
 		p := Employee{}
-		b := []BookOfEmployee{}
+		b := []Book{}
 		p.Id = val.Id
 		p.Name = val.Name
 		p.Department = val.Department
@@ -46,28 +45,16 @@ func (pr StaffProvaider) GiveStaffPro() (staff []Employee, err error) {
 	return staff, nil
 }
 
-func (pr StaffProvaider) StaffDeletePro(staff IdStaff) error {
+func (pr StaffProvaider) StaffDeletePro(staff []int) error {
 
-	if staff.IdEmp != "" {
-		Id, err := strconv.Atoi(staff.IdEmp)
-		if err != nil {
-			return err
-		}
-		err = pr.mapper.StaffDeleteOne(Id)
-		if err != nil {
-			return err
-		}
-		return nil
-	} else {
-		err := pr.mapper.StaffDeleteSome(staff.IdStaff)
-		if err != nil {
-			return err
-		}
-		return nil
+	err := pr.mapper.StaffDelete(staff)
+	if err != nil {
+		return err
 	}
+	return nil
 }
 
-func (pr StaffProvaider) UpStaffPro(staff EmployeePro) error {
+func (pr StaffProvaider) UpStaffPro(staff Employee) error {
 
 	err := pr.mapper.UpStaff(staff)
 	if err != nil {

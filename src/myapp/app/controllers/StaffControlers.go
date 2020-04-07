@@ -24,7 +24,7 @@ func (c Staff) Give() revel.Result {
 
 func (c Staff) Add() revel.Result {
 
-	var empAdd EmployeePro
+	var empAdd Employee
 	c.Params.BindJSON(&empAdd)
 
 	err := c.provaider.AddStaffPro(empAdd)
@@ -36,21 +36,13 @@ func (c Staff) Add() revel.Result {
 
 func (c Staff) Delete() revel.Result {
 
-	var IdArr IdStaff
-	IdArr.IdEmp = c.Params.Query.Get("id")
-	if IdArr.IdEmp != "" {
-		err := c.provaider.StaffDeletePro(IdArr)
-		if err != nil {
-			fmt.Println(err)
-		}
+	var Id []int
 
-	} else {
-		c.Params.BindJSON(&IdArr.IdStaff)
+	c.Params.BindJSON(&Id)
 
-		err := c.provaider.StaffDeletePro(IdArr)
-		if err != nil {
-			fmt.Println(err)
-		}
+	err := c.provaider.StaffDeletePro(Id)
+	if err != nil {
+		fmt.Println(err)
 	}
 
 	return c.Render()
@@ -58,7 +50,7 @@ func (c Staff) Delete() revel.Result {
 
 func (c Staff) Update() revel.Result {
 
-	var empUpdate EmployeePro
+	var empUpdate Employee
 	c.Params.BindJSON(&empUpdate)
 
 	err := c.provaider.UpStaffPro(empUpdate)

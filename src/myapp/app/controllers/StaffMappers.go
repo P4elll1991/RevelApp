@@ -11,7 +11,7 @@ type StaffMapper struct {
 	db *sql.DB
 }
 
-func (m StaffMapper) UpStaff(staff EmployeePro) error {
+func (m StaffMapper) UpStaff(staff Employee) error {
 	var err error
 	connStr := "user=postgres password=q dbname=library sslmode=disable"
 	m.db, err = sql.Open("postgres", connStr)
@@ -32,7 +32,7 @@ func (m StaffMapper) UpStaff(staff EmployeePro) error {
 	return nil
 }
 
-func (m StaffMapper) TakeStaff() ([]EmployeePro, []BookOfEmployee, error) {
+func (m StaffMapper) TakeStaff() ([]Employee, []Book, error) {
 	var err error
 	connStr := "user=postgres password=q dbname=library sslmode=disable"
 	m.db, err = sql.Open("postgres", connStr)
@@ -47,10 +47,10 @@ func (m StaffMapper) TakeStaff() ([]EmployeePro, []BookOfEmployee, error) {
 		return nil, nil, err
 	}
 	defer rows.Close()
-	staff := []EmployeePro{}
+	staff := []Employee{}
 
 	for rows.Next() {
-		p := EmployeePro{}
+		p := Employee{}
 		err := rows.Scan(&p.Id, &p.Name, &p.Department, &p.Position, &p.Cellnumber)
 		if err != nil {
 			fmt.Println(err)
@@ -66,17 +66,15 @@ func (m StaffMapper) TakeStaff() ([]EmployeePro, []BookOfEmployee, error) {
 		return nil, nil, err
 	}
 	defer rows.Close()
-	books := []BookOfEmployee{}
+	books := []Book{}
 
 	for rows.Next() {
-		p := BookOfEmployee{}
-		err := rows.Scan(&p.IdBook, &p.Isbn, &p.BookName, &p.Employeeid, &p.DatestartTime)
+		p := Book{}
+		err := rows.Scan(&p.Id, &p.Isbn, &p.BookName, &p.Employeeid, &p.Datestart)
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
-		p.Datestart = p.DatestartTime.Format("2006-01-02")
-		p.Datefinish = p.DatestartTime.AddDate(0, 0, 7).Format("2006-01-02")
 
 		books = append(books, p)
 	}
@@ -84,7 +82,7 @@ func (m StaffMapper) TakeStaff() ([]EmployeePro, []BookOfEmployee, error) {
 	return staff, books, nil
 }
 
-func (m StaffMapper) AddStaff(staff EmployeePro) error {
+func (m StaffMapper) AddStaff(staff Employee) error {
 	var err error
 	connStr := "user=postgres password=q dbname=library sslmode=disable"
 	m.db, err = sql.Open("postgres", connStr)
@@ -105,7 +103,7 @@ func (m StaffMapper) AddStaff(staff EmployeePro) error {
 	return nil
 }
 
-func (m StaffMapper) StaffDeleteSome(s []int) error {
+func (m StaffMapper) StaffDelete(s []int) error {
 	var err error
 	connStr := "user=postgres password=q dbname=library sslmode=disable"
 	m.db, err = sql.Open("postgres", connStr)
@@ -122,26 +120,5 @@ func (m StaffMapper) StaffDeleteSome(s []int) error {
 			return err
 		}
 	}
-	return nil
-}
-
-func (m StaffMapper) StaffDeleteOne(id int) error {
-	// Открытие базы данных
-	var err error
-	connStr := "user=postgres password=q dbname=library sslmode=disable"
-	m.db, err = sql.Open("postgres", connStr)
-	if err != nil {
-		return err
-	}
-	defer m.db.Close()
-
-	connStr = "delete from staff where id = $1"
-
-	// Удаление из базы данных
-	_, err = m.db.Exec(connStr, id)
-	if err != nil {
-		return err
-	}
-
 	return nil
 }

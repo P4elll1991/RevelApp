@@ -20,7 +20,7 @@ func (c Books) Give() revel.Result {
 	return c.RenderJSON(allbooks)
 }
 func (c Books) Add() revel.Result {
-	var bookAdd BookAdd
+	var bookAdd Book
 	c.Params.BindJSON(&bookAdd)
 
 	err := c.provaider.AddBookPro(bookAdd)
@@ -36,21 +36,14 @@ func (c Books) Add() revel.Result {
 
 func (c Books) Delete() revel.Result {
 
-	var IdArr IdBooks
-	IdArr.IdBook = c.Params.Query.Get("id")
-	if IdArr.IdBook != "" {
-		err := c.provaider.BookDeletePro(IdArr)
-		if err != nil {
-			fmt.Println(err)
-		}
+	var Id []int
 
-	} else {
-		c.Params.BindJSON(&IdArr.IdBooks)
+	c.Params.BindJSON(&Id)
 
-		err := c.provaider.BookDeletePro(IdArr)
-		if err != nil {
-			fmt.Println(err)
-		}
+	err := c.provaider.BookDeletePro(Id)
+	if err != nil {
+		fmt.Println(err)
+
 	}
 
 	allbooks, err := c.provaider.GiveBooksPro()

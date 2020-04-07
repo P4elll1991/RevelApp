@@ -11,7 +11,7 @@ type BookMapper struct {
 	db *sql.DB
 }
 
-func (m BookMapper) AddBook(b BookAddPro) error {
+func (m BookMapper) AddBook(b Book) error {
 	connStr := "user=postgres password=q dbname=library sslmode=disable"
 	var err error
 	m.db, err = sql.Open("postgres", connStr)
@@ -32,7 +32,7 @@ func (m BookMapper) AddBook(b BookAddPro) error {
 	return nil
 }
 
-func (m BookMapper) BookDeleteSome(b []int) error {
+func (m BookMapper) BookDelete(b []int) error {
 	var err error
 	connStr := "user=postgres password=q dbname=library sslmode=disable"
 	m.db, err = sql.Open("postgres", connStr)
@@ -49,27 +49,6 @@ func (m BookMapper) BookDeleteSome(b []int) error {
 			return err
 		}
 	}
-	return nil
-}
-
-func (m BookMapper) BookDeleteOne(id int) error {
-	// Открытие базы данных
-	var err error
-	connStr := "user=postgres password=q dbname=library sslmode=disable"
-	m.db, err = sql.Open("postgres", connStr)
-	if err != nil {
-		return err
-	}
-	defer m.db.Close()
-
-	connStr = "delete from books where id = $1"
-
-	// Удаление из базы данных
-	_, err = m.db.Exec(connStr, id)
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 

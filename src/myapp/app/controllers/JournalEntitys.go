@@ -7,24 +7,12 @@ import (
 )
 
 type Event struct {
-	Id         int
-	Event      string
-	BookId     int
-	Isbn       int
-	BookName   string
-	DateEvent  time.Time
-	EmployeeId int
-	Name       string
-	Cellnumber int
-}
-
-type EventPro struct {
 	Id          int
 	Event       string
 	BookId      int
-	BookNameJ   string
 	IsbnJ       int
-	DateEvent   string
+	BookNameJ   string
+	DateEvent   time.Time
 	EmployeeId  int
 	NameJ       string
 	CellnumberJ int

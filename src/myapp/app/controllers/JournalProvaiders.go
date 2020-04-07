@@ -22,27 +22,11 @@ func (pr JournalProvaider) AddEventPro(event Event) error {
 	return nil
 }
 
-func (pr JournalProvaider) GiveJournalPro() (journal []EventPro, err error) {
+func (pr JournalProvaider) GiveJournalPro() (journal []Event, err error) {
 
-	journalPro, err := pr.mapper.TakeJournal()
+	journal, err = pr.mapper.TakeJournal()
 	if err != nil {
 		return nil, err
-	}
-
-	for _, val := range journalPro {
-		p := EventPro{}
-
-		p.BookNameJ = val.BookName
-		p.IsbnJ = val.Isbn
-		p.NameJ = val.Name
-		p.CellnumberJ = val.Cellnumber
-		p.Id = val.Id
-		p.Event = val.Event
-		p.BookId = val.BookId
-		p.EmployeeId = val.EmployeeId
-		p.DateEvent = val.DateEvent.Format("2006-01-02")
-
-		journal = append(journal, p)
 	}
 
 	return journal, nil
