@@ -7,8 +7,9 @@ class modalJournal {
 		webix.ajax().get("/Journal/Give").then(function(data){
 			data = data.json();
 			data.forEach(function(val){
-					var DateEvent = val.DateEvent.slice(0, 10);
-					val.DateEvent = new Date(DateEvent);				
+				val.id = val.Id;
+				var DateEvent = val.DateEvent.slice(0, 10);
+				val.DateEvent = new Date(DateEvent);				
 			});
 			console.log(data);
             $$("journalTable").parse(data);

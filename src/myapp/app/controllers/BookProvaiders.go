@@ -10,6 +10,8 @@ type BookProvaider struct {
 	mapper BookMapper
 }
 
+//метод возвращающий данные книг
+
 func (pr BookProvaider) GiveBooksPro() (books []Book, err error) {
 	books, err = pr.mapper.TakeBooks()
 	if err != nil {
@@ -18,6 +20,8 @@ func (pr BookProvaider) GiveBooksPro() (books []Book, err error) {
 
 	return books, nil
 }
+
+//метод удаляющий книги
 
 func (pr BookProvaider) BookDeletePro(books []int) error {
 
@@ -29,13 +33,9 @@ func (pr BookProvaider) BookDeletePro(books []int) error {
 
 }
 
-func (pr BookProvaider) AddBookPro(bookAdd Book) (err error) {
-	var book Book
-	book.Isbn = bookAdd.Isbn
-	book.BookName = bookAdd.BookName
-	book.Autor = bookAdd.Autor
-	book.Publisher = bookAdd.Publisher
-	book.Year = bookAdd.Year
+//метод добавляющий книгу
+
+func (pr BookProvaider) AddBookPro(book Book) (err error) {
 	book.Employeeid = 1
 	book.Datestart = time.Now()
 	err = pr.mapper.AddBook(book)
@@ -44,6 +44,8 @@ func (pr BookProvaider) AddBookPro(bookAdd Book) (err error) {
 	}
 	return nil
 }
+
+// метод обновляющий данные о книгах
 
 func (pr BookProvaider) UpdateBookPro(bookUpdate Book) error {
 

@@ -13,14 +13,18 @@ type Staff struct {
 	provaider StaffProvaider
 }
 
+// метод получающий даннные сотрудников
+
 func (c Staff) Give() revel.Result {
 
 	staff, err := c.provaider.GiveStaffPro()
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 	return c.RenderJSON(staff)
 }
+
+// метод добавляющий сотрудника
 
 func (c Staff) Add() revel.Result {
 
@@ -31,8 +35,22 @@ func (c Staff) Add() revel.Result {
 	if err != nil {
 		fmt.Println(err)
 	}
-	return c.Render()
+
+	b := Books{}
+	allbooks, err := b.provaider.GiveBooksPro() // перезагрузка таблицы книг
+	if err != nil {
+		fmt.Println(err)
+	}
+	staff, err := c.provaider.GiveStaffPro() // перезрузка таблицы сотрудников
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	data := data{allbooks, staff, nil} // общие данные книг и сотрудников
+	return c.RenderJSON(data)
 }
+
+// метод удаляющий сотрудников
 
 func (c Staff) Delete() revel.Result {
 
@@ -45,8 +63,15 @@ func (c Staff) Delete() revel.Result {
 		fmt.Println(err)
 	}
 
-	return c.Render()
+	staff, err := c.provaider.GiveStaffPro() // перезрузка таблицы сотрудников
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return c.RenderJSON(staff)
 }
+
+// метод обновляющий сотрудника
 
 func (c Staff) Update() revel.Result {
 
@@ -58,15 +83,15 @@ func (c Staff) Update() revel.Result {
 		fmt.Println(err)
 	}
 	b := Books{}
-	allbooks, err := b.provaider.GiveBooksPro()
+	allbooks, err := b.provaider.GiveBooksPro() // перезагрузка таблицы книг
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
-	staff, err := c.provaider.GiveStaffPro()
+	staff, err := c.provaider.GiveStaffPro() // перезрузка таблицы сотрудников
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 
-	data := data{allbooks, staff, nil}
+	data := data{allbooks, staff, nil} // общие данные книг и сотрудников
 	return c.RenderJSON(data)
 }

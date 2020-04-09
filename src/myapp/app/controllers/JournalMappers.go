@@ -10,17 +10,17 @@ type JournalMapper struct {
 	db *sql.DB
 }
 
+// метод получающий данные журнала
+
 func (m JournalMapper) TakeJournal() ([]Event, error) {
 	var err error
-	connStr := "user=postgres password=q dbname=library sslmode=disable"
-	m.db, err = sql.Open("postgres", connStr)
+	m.db, err = InitDB() // ининциализация
 	if err != nil {
 		return nil, err
 	}
-	defer m.db.Close()
 
-	connStr = "SELECT * From journal"
-	rows, err := m.db.Query(connStr)
+	connStr := "SELECT * From journal"
+	rows, err := m.db.Query(connStr) // запрос
 	if err != nil {
 		return nil, err
 	}
@@ -40,18 +40,18 @@ func (m JournalMapper) TakeJournal() ([]Event, error) {
 	return journal, nil
 }
 
+// метод добавляющий нвовое событие в БД
+
 func (m JournalMapper) AddEvent(event Event) error {
 	var err error
-	connStr := "user=postgres password=q dbname=library sslmode=disable"
-	m.db, err = sql.Open("postgres", connStr)
+	m.db, err = InitDB() // Инициализация БД
 	if err != nil {
 		return err
 	}
-	defer m.db.Close()
 
 	// Добавить елемент
 
-	connStr = "insert into journal (event, bookid, isbn, BookName, employeeid, Name, Cellnumber, dateevent) values ( $1, $2, $3, $4, $5, $6, $7, $8)"
+	connStr := "insert into journal (event, bookid, isbn, BookName, employeeid, Name, Cellnumber, dateevent) values ( $1, $2, $3, $4, $5, $6, $7, $8)"
 	_, err = m.db.Exec(connStr, event.Event, event.BookId, event.IsbnJ, event.BookNameJ, event.EmployeeId, event.NameJ, event.CellnumberJ, event.DateEvent)
 
 	if err != nil {

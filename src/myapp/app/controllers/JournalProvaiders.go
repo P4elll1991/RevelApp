@@ -10,6 +10,8 @@ type JournalProvaider struct {
 	mapper JournalMapper
 }
 
+// метод добавляющий данные в журнал
+
 func (pr JournalProvaider) AddEventPro(event Event) error {
 
 	event.DateEvent = time.Now()
@@ -21,6 +23,8 @@ func (pr JournalProvaider) AddEventPro(event Event) error {
 
 	return nil
 }
+
+// метод получающий данные журнала
 
 func (pr JournalProvaider) GiveJournalPro() (journal []Event, err error) {
 

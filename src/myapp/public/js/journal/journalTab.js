@@ -5,7 +5,7 @@ class journalTab {
     this.modal = new modalJournal();
     this.modal.giveData(this.modal);
   }
-  
+  // кнопки управления
     buttons = [
       { id:"goToEmployeeLog", view:"button", type:"icon", icon:"mdi mdi-account", value: "Перейти к сотруднику"},
       { id:"goToBookLog", view:"button", type:"icon", icon:"mdi mdi-book-open-variant", value: "Перейти к книге"},
@@ -19,7 +19,7 @@ class journalTab {
       { id:"NameJ",  header:"ФИО",   sort: "string",  adjust:true,},
       { id:"CellnumberJ",  header:"Телефон",   sort: "string",  adjust:true,},
       ];
-  
+  // инициализация таблицы
     init(){
       this.view = {
         view:"layout",
@@ -55,19 +55,19 @@ class journalTab {
     getView() {
       return this.init();
     }
-
+// добавление событий
     editeEvents(parent){
 
       $$("goToBookLog").attachEvent("onItemClick", function(){
-        parent.focusBook();
+        parent.focusBook(); // фокус к ниге
       });
 
       $$("goToEmployeeLog").attachEvent("onItemClick", function(){
-        parent.focusStaff("staffTable");
+        parent.focusStaff("staffTable"); // фокус к сотруднику
       });
   
     }
-
+// функция фокуса к книге
     focusBook() {
       var item = $$("journalTable").getSelectedItem();
       
@@ -96,7 +96,7 @@ class journalTab {
 
     }
 
-
+// функция фокуса к книге
     focusStaff() {
       var item = $$("journalTable").getSelectedItem();
       if (!item) return;

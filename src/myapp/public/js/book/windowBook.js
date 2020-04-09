@@ -1,18 +1,7 @@
 class windowBook {
-
     
     
     
-    formRules = {
-        "Isbn":webix.rules.isNotEmpty,
-        "Isbn":webix.rules.isNumber,
-        "BookName":webix.rules.isNotEmpty,
-        "Autor":webix.rules.isNotEmpty,
-        "Publisher":webix.rules.isNotEmpty,
-        "Name":webix.rules.isNotEmpty,
-        "Year":webix.rules.isNotEmpty,
-        "Year":webix.rules.isNumber,
-            };
     
     getWindow(){
       
@@ -40,7 +29,7 @@ class windowBook {
                     { view:"text", name:"Autor", label:"Автор" },
                     { view:"text", name:"Publisher", label:"Издатель" },
                     { view:"text", name:"Year", label:"Год" },
-                    { view:"richselect", id: "Status", name:"Status",  label:"Статус",  value:"В наличии", options:["В наличии", "Нет в наличии"]},
+                    { view:"richselect", id: "Status", name:"Status",  label:"Статус", options:["В наличии", "Нет в наличии"]},
                     { view:"richselect", id:"Name", name:"Name",  label:"Сотрудник", hidden: true, minWidth: 500, options:{
                       body:{
                         id:"options",
@@ -49,7 +38,19 @@ class windowBook {
                     }},
                     { view:"button", id:"updateBookTab", type:"icon", icon:"mdi mdi-check", }
                     ],
-                      rules: this.formRules,
+                      rules: {
+                        "Isbn":webix.rules.isNotEmpty,
+                        "Isbn":webix.rules.isNumber,
+                        "BookName":webix.rules.isNotEmpty,
+                        "Autor":webix.rules.isNotEmpty,
+                        "Publisher":webix.rules.isNotEmpty,
+                        "Name":webix.rules.isNotEmpty,
+                        "Year":webix.rules.isNotEmpty,
+                        "Year":webix.rules.isNumber,
+                        "Year":function(values){
+                          return (Number(values) > 1500 )&& (Number(values) < 2100) 
+                        },
+                      },
                   },
       
               ]
@@ -60,6 +61,8 @@ class windowBook {
         return this.window;
     }
 
+    // метод формирующий опции в форме
+
     optionsBook() {
       webix.ajax().get("/Staff/Give").then(function(data){
         var staffOptions =[];
@@ -69,9 +72,8 @@ class windowBook {
           option.id = val.Id;
           option.value = val.Name + " " + val.Cellnumber;
           staffOptions.push(option);
-          
+  
         });
-        console.log(staffOptions);
         $$("options").parse(staffOptions);
         return staffOptions;
     });

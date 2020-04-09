@@ -12,14 +12,18 @@ type Journal struct {
 	provaider JournalProvaider
 }
 
+// метод получающий данные из журнала
+
 func (c Journal) Give() revel.Result {
 
 	Journal, err := c.provaider.GiveJournalPro()
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 	return c.RenderJSON(Journal)
 }
+
+// методо доавляющий данные в журнал
 
 func (c Journal) Add() revel.Result {
 

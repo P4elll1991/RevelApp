@@ -6,13 +6,18 @@ class bookTab {
     
   }
   
+  // кнопки управления
     buttons = [
       { id:"change", view:"button", type:"icon", icon:"mdi mdi-pen", value: "Изменить"},                           
       { id:"push",  view:"button", type:"icon", icon:"mdi mdi-plus-box-outline", value: "Добавить"},
       { id:"goToEmployee", view:"button", type:"icon", icon:"mdi mdi-account", value: "Перейти к сотруднику"},
       { id:"delete", view:"button", type:"icon", icon:"mdi mdi-delete-forever", value: "Удалить"},      
+      { id:"GiveOut", view:"button", value: "Выдать"},      
+      { id:"Return", view:"button", value: "Вернуть"},      
       ];
   
+
+      // столбцы таблицы
       columns = [
         { id:"ch1", header:{ content:"masterCheckbox", contentId:"mc1" }, template:"{common.checkbox()}", width: 50,},
         { id:"Isbn",    header:"ISBN", adjust:true, sort: "int",},
@@ -27,7 +32,7 @@ class bookTab {
         { id:"Datefinish",  header:"Дата сдачи", adjust: true, format:webix.Date.dateToStr("%d.%m.%Y"), sort: "date"}
                     ];
   
-    init() {
+    init() { // инициализация таблицы
     
       this.view = {
         view:"layout",
@@ -62,58 +67,122 @@ class bookTab {
   
     }
 
-    initWindow() {
+    initWindow() { // инициализация модального окна
       this.up = new windowBook();
       this.window = this.up.getWindow();
       return this.window;
     }
 
     getView() {
-      return this.init();
+      return this.init(); // отправка таблицы
     }
 
-    editeEvents(parent){
-      var options = new windowBook();
+    // прикрепление событий
+
+    editeEvents(parent){ 
+      var options = new windowBook(); // отправка опций в форму
       options.optionsBook();
+      // удаление
       $$("delete").attachEvent("onItemClick", function(){
         parent.delete();
       });
 
+      // открытие окна изменений
+
       $$("change").attachEvent("onItemClick", function(){
-        $$("Status").show();
+        var item_data = $$("formBook").getValues()
+        console.log(item_data);
+        var check = item_data.Status;
+        console.log(check);
+        if(check == "Нет в наличии") {
+          webix.confirm({
+            text: "Нельзя редактировать книгу пока она не будет сдана", 
+            ok: "OK",
+          }).then(function(){
+            return
+          });
+          return;
+        };
+        $$("Status").hide();
+        $$("Name").hide();
+        parent.checkWin = true; // флаг который сигнализирует модальное окно
+        var item_data = $$("formBook").getValues()
+        var check = item_data.BookName;
+        console.log(check);
+        parent.formBlock(true, false);
+        if(check != "")
+             $$("windowBook").show();
+      });
+
+      // открытие окна изменений по двойному щекчку по эементу
+
+      $$("bookTable").attachEvent("onItemDblClick", function(){
+        $$("Status").hide();
+        parent.checkWin = true; // флаг который сигнализирует модальное окно
+        var item_data = $$("formBook").getValues()
+        var check = item_data.name;
+        parent.formBlock(true, false);
+        if(check != "")
+             $$("windowBook").show();
+      });
+
+      // открытие окна добавления
+
+      $$("push").attachEvent("onItemClick", function(){
+        parent.checkWin = false; // флаг который сигнализирует модальное окно
+        $$("formBook").clear();
+        $$("Status").hide();
+        parent.formBlock(false, false);
+        $$("windowBook").show();
+      });
+
+      // выдать элемент
+
+      $$("GiveOut").attachEvent("onItemClick", function(){
+
+        var item_data = $$("formBook").getValues()
+        console.log(item_data);
+        var check = item_data.Status;
+        console.log(check);
+        if(check != "В наличии") return; // если нет в наличии то отдать нельзя
+        $$("Status").setValue("Нет в наличии"); // смена статуса на нет в наличии в форме
+        $$("Status").hide();
+        $$("windowBook").show();
         parent.checkWin = true;
         var item_data = $$("formBook").getValues()
         var check = item_data.BookName;
+        parent.formBlock(true, true);
         console.log(check);
         if(check != "")
              $$("windowBook").show();
       });
 
-      $$("bookTable").attachEvent("onItemDblClick", function(){
-        $$("Status").show();
-        parent.checkWin = true;
-        var item_data = $$("formBook").getValues()
-        var check = item_data.name;
-        if(check != "")
-             $$("windowBook").show();
-      });
-
-      $$("push").attachEvent("onItemClick", function(){
-        parent.checkWin = false;
-        $$("formBook").clear();
-        $$("Status").hide();
-        $$("formBook").elements["Name"].hide();
-        $$("windowBook").show();
-      });
-
+      // операции после выбора элемента
       $$("bookTable").attachEvent("onAfterSelect", function(){
-           parent.afterSelect();
-      });
+        parent.afterSelect();
+     });
+
+     // оперции после снятия выбора
 
       $$("bookTable").attachEvent("onAfterUnSelect", function(selection){
-          parent.afterUnSelect(selection);
+
+           parent.afterUnSelect(selection);
+      });
+
+      // вернуть книгу
+
+      $$("Return").attachEvent("onItemClick", function(){
+        parent.checkWin = true;
+        $$("Status").setValue("В наличии");
+        $$("formBook").elements["Status"].refresh();
+        var form = $$("formBook");
+        var item_data = form.getValues();
+        console.log(item_data);
+        parent.updateTab(parent.checkWin, parent);
            
       });
+
+      //выйти из окна
 
       $$("exitWindowBook").attachEvent("onItemClick", function() {
           $$("windowBook").hide();
@@ -124,11 +193,15 @@ class bookTab {
           parent.afterSelect();
       });
 
+      // подтвердить отправку формы
+
       $$("updateBookTab").attachEvent("onItemClick", function(){
           
-          parent.updateTab(parent.checkWin);
+          parent.updateTab(parent.checkWin, parent);
 
       });
+
+      // событие после смены статуса в форме
 
       $$("formBook").elements["Status"].attachEvent("onChange", function(newv, oldv){
         if (newv == "Нет в наличии") {
@@ -140,7 +213,7 @@ class bookTab {
         }
         });
 
-
+        // перейти к сотруднку
       $$("goToEmployee").attachEvent("onItemClick", function(){
         parent.focus();
       });
@@ -156,23 +229,25 @@ class bookTab {
   
     }
 
+    // удалить книгу
+
     delete(){
     var list = $$("bookTable");
     var item_id = list.getSelectedId();
     var item = list.getSelectedItem();
     console.log(item.Status);
     var IdList = []; 
-    
+    // если выбрана одна книга
     if (!Array.isArray(item)) {
       if (item_id){
-        if (item.Status == "Нет в наличии") {
+        if (item.Status == "Нет в наличии") { // проверка не находится ли книга у сотрудника
           webix.confirm({
             text: "Нельзя удалить книгу пока она не будет сдана", 
             ok: "OK",
           }).then(function(){
             return
           });
-        } else {
+        } else { // удаление
           webix.confirm({
             text: "Вы действительно хотите удалить книгу?",
             cancel: "Нет", 
@@ -186,21 +261,8 @@ class bookTab {
               }).post("/Books/Delete", JSON.stringify(IdList)).then(function(data){
               data = data.json();
               data.forEach(function(val){
-                val.id = val.Id;
-                  if (val.Employeeid == 1){
-                    val.Status = "В наличии";
-                    val.Employeei = 0;
-                    val.Name = "";
-                    val.Cellnumber = null;
-                    val.Datestart = null;
-                    val.Datefinish = null;
-                  } else {
-                    val.Status = "Нет в наличии";
-                    var Datestart = val.Datestart.slice(0, 10);
-                    val.Datestart = new Date(Datestart);
-                    val.Datefinish = new Date(Datestart);
-                    val.Datefinish.setDate(val.Datefinish.getDate() + 7);
-                  }
+                let obj = new modalBook()
+                val = obj.dataProcessing(val);
               });
               $$("bookTable").parse(data);
               });
@@ -208,10 +270,10 @@ class bookTab {
         } 
       }
     } 
-    else {
+    else { // если выбрано много книг
       var i = 0; 
-      item.forEach(function(val){
-        i++;
+      item.forEach(function(val){ // проверка не находится ли книга у сотрудника создание массива id
+        i++; // счетчик
         if (val.Status == "Нет в наличии") {
           webix.confirm({
             text: "Нельзя удалить книгу пока она не будет сдана.", 
@@ -224,7 +286,7 @@ class bookTab {
         }
         
       });
-      if (item_id && (IdList.length == i)){
+      if (item_id && (IdList.length == i)){ // если длина массива совпадает со значение счетчика есть id то производится удаление
         webix.confirm({
             text: "Вы действительно хотите удалить книги?",
             cancel: "Нет", 
@@ -239,21 +301,8 @@ class bookTab {
               }).post("/Books/Delete", JSON.stringify(IdList)).then(function(data){
              data = data.json();
              data.forEach(function(val){
-              val.id = val.Id;
-                  if (val.Employeeid == 1){
-                    val.Status = "В наличии";
-                    val.Employeei = 0;
-                    val.Name = "";
-                    val.Cellnumber = null;
-                    val.Datestart = null;
-                    val.Datefinish = null;
-                  } else {
-                    val.Status = "Нет в наличии";
-                    var Datestart = val.Datestart.slice(0, 10);
-                    val.Datestart = new Date(Datestart);
-                    val.Datefinish = new Date(Datestart);
-                    val.Datefinish.setDate(val.Datefinish.getDate() + 7);
-                  }
+              let obj = new modalBook()
+              val = obj.dataProcessing(val);
             });
             $$("bookTable").parse(data);
             });
@@ -262,17 +311,21 @@ class bookTab {
     }
   }
 
+  // событие после выбора элемента
+
   afterSelect() {
+
       var item = $$("bookTable").getSelectedItem();
       console.log(item);
+      if (!item) return;
       var x = item.Name;
-      item.Name = item.Employeeid;
+      item.Name = item.Employeeid; // Нужно чтобы в форме выбиралась нужная опция
+      $$("formBook").setValues(item); // автозаполнение формы
       $$("formBook").setValues(item);
-      $$("formBook").setValues(item);
-      if (Array.isArray(item)) {
-        item.forEach(function(val){
-          val.ch1 = 1;
-          item.Name = x;
+      if (Array.isArray(item)) { // проверка один или несколько елементов выбрано
+        item.forEach(function(val){ // если несколько
+          val.ch1 = 1; // нажатие чекбокса
+          //item.Name = x;
           $$("bookTable").updateItem(val.id, item);
         });
         return;
@@ -282,198 +335,41 @@ class bookTab {
       $$("bookTable").updateItem(item.id, item);
     }
 
-
+// функция после снятие выделения
     afterUnSelect(selection){
       var item = selection;
-      item.ch1 = 0;
+      item.ch1 = 0; // снятие чекбокса
       if(!item.id) return;
       $$("bookTable").updateItem(item.id, item);
     }
 
-  updateTab(check){
+
+
+// Изменение и добавление данных    
+  updateTab(check, parent){ // check - флаг указывающий что будет происходитьЖ изменение или удаление
+
+// Получение данных формы
     var table = $$("bookTable");
     var item = table.getSelectedItem();
      var form = $$("formBook");
      var item_data = form.getValues();
      
     
-
-    form.validate();
+// Проверка валидности данных
     if (!form.validate()){
         webix.message({ type:"error", text:"Некорректно заполненная форма" });
         return
     }
-     if(!check) {
-        if (item_data.id) {
-          for (var i in this.books){
-          if(item_data.id == this.books[i].id) {
-            webix.message({ type:"error", text:"Книга с таким ISBN уже существует" });
-            return
-          };
-        };
-      }
-      if ((Number(item_data.Year) < 1500 )|| (Number(item_data.Year) > 2100)){
-        webix.message({ type:"error", text:"Невалидный год" });
-        return
-      }
-      item_data["Status"] = "В наличии";
-      this.postData = {
-        action:"info",
-        isbn:Number(item_data.Isbn), 
-        bookName:item_data.BookName, 
-        autor:item_data.Autor, 
-        publisher:item_data.Publisher, 
-        year:Number(item_data.Year)}
-        console.log(this.postData)
-
-      webix.ajax().headers({
-        "Content-type":"application/json"
-    }).post("/Books/Add", JSON.stringify(this.postData)).then(function(data){
-			data = data.json();
-			data.forEach(function(val){
-				val.id = val.Id;
-				if (val.Employeeid == 1){
-					val.Status = "В наличии";
-					val.Employeei = 0;
-					val.Name = "";
-					val.Cellnumber = null;
-          val.Datestart = null;
-          val.Datefinish = null;
-				} else {
-					val.Status = "Нет в наличии";
-					var Datestart = val.Datestart.slice(0, 10);
-					val.Datestart = new Date(Datestart);
-					val.Datefinish = new Date(Datestart);
-					val.Datefinish.setDate(val.Datefinish.getDate() + 7);
-				}
-			});
-      $$("bookTable").parse(data);
-		  });
-
-
-     } else {
-      if (item_data.Status) {
-        item_data.Employeeid = Number(item_data.Name);
-          if (item_data.Status == "В наличии") {
-            this.postData = {
-              Id:Number(item_data.Id),
-              Isbn:Number(item_data.Isbn), 
-              BookName:item_data.BookName, 
-              Autor:item_data.Autor, 
-              Publisher:item_data.Publisher, 
-              Year:Number(item_data.Year),
-              EmployeeId:1,
-      
-            }
-          item_data.Name = "";
-          item_data.Datestart = "";
-          item_data.Datefinish = "";
-        } else {
-          this.postData = {
-            Id:Number(item_data.Id),
-            Isbn:Number(item_data.Isbn), 
-            BookName:item_data.BookName, 
-            Autor:item_data.Autor, 
-            Publisher:item_data.Publisher, 
-            Year:Number(item_data.Year),
-            EmployeeId:item_data.Employeeid,
-    
-          }
-          var today = new Date;
-          var dateFinish = new Date;
-          item_data.Datestart = new Date;
-          dateFinish.setDate(dateFinish.getDate() + 7);
-          item_data.Datefinish = dateFinish;
-
-        }
-      }
-
-        $$("staffTable").eachRow(function(row){
-          var record = $$("staffTable").getItem(row);
-          if (record.Id == item_data.Name){
-            item_data.Cellnumber = record.Cellnumber;
-            item_data.Name = record.Name;
-          }
-      });
-      
-        console.log(item_data);
-        if (item.Status != item_data.Status){
-          console.log("нет");
-          if(item_data.Status == "В наличии"){
-            console.log("Возвращено")
-            this.postDataEvent = {
-              Event: "Возвращено",
-              BookId :Number(item_data.Id),
-              BookName: item_data.BookName,
-              Isbn: Number(item_data.Isbn),
-              EmployeeId: Number(item.Employeeid),
-              Name: item.Name,
-              Cellnumber: Number(item.Cellnumber)
-            };
-            console.log(this.postDataEvent)
-          } else {
-            console.log("Выдано")
-            this.postDataEvent = {
-              Event: "Выдано",
-              BookId :Number(item_data.Id),
-              BookName: item_data.BookName,
-              Isbn: Number(item_data.Isbn),
-              Name: item_data.Name,
-              EmployeeId: Number(item_data.Employeeid),
-              Cellnumber: Number(item_data.Cellnumber),
-            };
-            console.log(this.postDataEvent)
-          }
-
-          webix.ajax().headers({
-            "Content-type":"application/json"
-        }).post("/Journal/Add", JSON.stringify(this.postDataEvent));
-
-
-
-        } 
-        
-          console.log(this.postData);
-          webix.ajax().headers({
-            "Content-type":"application/json"
-        }).post("/Books/Update", JSON.stringify(this.postData)).then(function(data){
-          data = data.json();
-          console.log(data);
-          data.Books.forEach(function(val){
-                val.id = val.Id;
-            if (val.Employeeid == 1){
-              val.Status = "В наличии";
-              val.Employeei = 0;
-              val.Name = "";
-              val.Cellnumber = null;
-              val.Datestart = null;
-              val.Datefinish = null;
-            } else {
-              val.Status = "Нет в наличии";
-              var Datestart = val.Datestart.slice(0, 10);
-              val.Datestart = new Date(Datestart);
-              val.Datefinish = new Date(Datestart);
-              val.Datefinish.setDate(val.Datefinish.getDate() + 7);
-				}
-          });
-            $$("bookTable").parse(data.Books);
-            data.Staff.forEach(function(val){
-              val.id = val.Id;
-              val.BooksStr = "";
-              val.Books.forEach(function(v){
-                val.BooksStr += "<p style = 'padding: 0px; margin: 0px; height: 25px;'> ISBN : " + v.Isbn + ", " + v.BookName + ", " + v.Datestart + " - " + v.Datefinish + ";</p>";
-              });
-            });
-            $$("staffTable").parse(data.Staff);
-            $$("journalTable").parse(data.Journal);
-        });
+     if(!check) { // если добавляем книгу
+      parent.addBook(item_data); // добавить книгу
+     } else { // иначе изменяем данные
+      parent.updateBook(item, item_data, parent);
      }
-     
      
      $$("windowBook").hide();
      form.clear();
   }
-
+// перевод фокуса к сотруднику
   focus() {
     var item = $$("bookTable").getSelectedItem();
     if (!item) return;
@@ -490,6 +386,130 @@ class bookTab {
     $$("staffView").show();
     $$("staffTable").showItem(focusId);
   }
+// блокировка и снятие блокировки с полей формы в зависимости от того какое окно выбрано
+  formBlock(bool1, bool2){
+    $$("formBook").elements["Isbn"].config.readonly = bool1;
+        $$("formBook").elements["Isbn"].refresh();
+        $$("formBook").elements["BookName"].config.readonly = bool2;
+        $$("formBook").elements["BookName"].refresh();
+        $$("formBook").elements["Autor"].config.readonly = bool2;
+        $$("formBook").elements["Autor"].refresh();
+        $$("formBook").elements["Publisher"].config.readonly = bool2;
+        $$("formBook").elements["Publisher"].refresh();
+        $$("formBook").elements["Year"].config.readonly = bool2;
+        $$("formBook").elements["Year"].refresh();
+        $$("formBook").elements["Status"].config.readonly = bool2;
+        $$("formBook").elements["Status"].refresh();
+  }
 
+  //функция добавления книги
+
+  addBook(item_data){
+    if (item_data.id) {
+      for (var i in this.books){
+      if(item_data.id == this.books[i].id) {
+        webix.message({ type:"error", text:"Книга с таким ISBN уже существует" });
+        return
+      };
+    };
+  }
+
+  item_data.Isbn = Number(item_data.Isbn);
+  item_data.Year = Number(item_data.Year);
+
+  webix.ajax().headers({
+    "Content-type":"application/json"
+}).post("/Books/Add", JSON.stringify(item_data)).then(function(data){
+  data = data.json();
+  data.forEach(function(val){
+    let obj = new modalBook()
+    val = obj.dataProcessing(val);
+  });
+  $$("bookTable").parse(data);
+  });
+  }
+
+  // функция добавления события
+
+  addEvent(item, item_data) {
+    $$("staffTable").eachRow(function(row){ // формируем данные для создания события
+      var record = $$("staffTable").getItem(row);
+      if (record.Id == item_data.Name){
+        item_data.Cellnumber = record.Cellnumber;
+        item_data.Name = record.Name;
+      }
+    });
+    this.postDataEvent = {
+      Event: "Возвращено",
+      BookId :Number(item_data.Id),
+      BookNameJ: item_data.BookName,
+      IsbnJ: Number(item_data.Isbn),
+    };
+
+    if(item_data.Status == "В наличии"){ // проверяем какое было событие и составляем данные исходя из этого
+      console.log("Возвращено")
+      this.postDataEvent.Event = "Возвращено";
+      this.postDataEvent.NameJ = item.Name;
+      this.postDataEvent.CellnumberJ = Number(item.Cellnumber);
+      this.postDataEvent.EmployeeId = Number(item.Employeeid);
+      console.log(this.postDataEvent)
+    } else {
+      console.log("Выдано")
+      this.postDataEvent.Event = "Выдано";
+      this.postDataEvent.NameJ = item_data.Name;
+      this.postDataEvent.CellnumberJ = Number(item_data.Cellnumber);
+      this.postDataEvent.EmployeeId = Number(item_data.Name);
+      console.log(this.postDataEvent)
+    }
+
+    webix.ajax().headers({ // запрос на создание события в журнале
+      "Content-type":"application/json"
+    }).post("/Journal/Add", JSON.stringify(this.postDataEvent));
+  }
+
+// Обновление данных книги
+
+  updateBook(item, item_data, parent) {
+    item_data.Id = Number(item_data.Id); // конверция текстовых данных таблицы
+    item_data.Isbn = Number(item_data.Isbn);  
+    item_data.Year = Number(item_data.Year);
+    if (item_data.Status == "В наличии") {
+        item_data.EmployeeId = 1 
+
+    } else {
+      item_data.EmployeeId = Number(item_data.Name); 
+    }
+  
+    if (item.Status != item_data.Status){ // проверям было ли событие выдачи/возвращения
+      parent.addEvent(item, item_data);
+    } 
+    
+      webix.ajax().headers({
+        "Content-type":"application/json"
+    }).post("/Books/Update", JSON.stringify(item_data)).then(function(data){
+      data = data.json();
+      console.log(data);
+      data.Books.forEach(function(val){
+          let obj = new modalBook()
+           val = obj.dataProcessing(val); // обработка данных перед хагрузкой в таблицу
+      });
+        $$("bookTable").parse(data.Books);
+
+        data.Staff.forEach(function(val){
+          let obj = new modalStaff()
+          val = obj.dataProcessing(val);// обработка данных перед хагрузкой в таблицу
+          });
+        $$("staffTable").parse(data.Staff);
+        $$("staffTable").refreshColumns();
+
+        data.Journal.forEach(function(val){
+          val.id = val.Id;
+          var DateEvent = val.DateEvent.slice(0, 10);
+          val.DateEvent = new Date(DateEvent);				
+      });
+        $$("journalTable").parse(data.Journal);
+        $$("journalTable").refreshColumns();
+    });
+  }
 
 }

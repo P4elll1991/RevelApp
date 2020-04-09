@@ -9,6 +9,8 @@ module:testrunner
 
 GET     /                                       App.Index
 GET     /Exite                                  App.Exite
+POST    /Add                                    App.Add
+POST    /Update                                 App.Update
 GET     /Books/Give                             Books.Give
 GET     /Staff/Give                             Staff.Give
 GET     /Journal/Give                           Journal.Give
