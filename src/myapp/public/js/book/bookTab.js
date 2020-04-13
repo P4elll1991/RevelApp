@@ -90,6 +90,8 @@ class bookTab {
       // открытие окна изменений
 
       $$("change").attachEvent("onItemClick", function(){
+        var item = $$("bookTable").getSelectedItem();
+       
         var item_data = $$("formBook").getValues()
         console.log(item_data);
         var check = item_data.Status;
@@ -139,7 +141,8 @@ class bookTab {
       // выдать элемент
 
       $$("GiveOut").attachEvent("onItemClick", function(){
-
+        var item = $$("bookTable").getSelectedItem();
+        
         var item_data = $$("formBook").getValues()
         console.log(item_data);
         var check = item_data.Status;
@@ -172,6 +175,8 @@ class bookTab {
       // вернуть книгу
 
       $$("Return").attachEvent("onItemClick", function(){
+        var item = $$("bookTable").getSelectedItem();
+        
         parent.checkWin = true;
         $$("Status").setValue("В наличии");
         $$("formBook").elements["Status"].refresh();
@@ -316,6 +321,21 @@ class bookTab {
   afterSelect() {
 
       var item = $$("bookTable").getSelectedItem();
+      let check = false;
+      for (let key in item) {
+        if (key == "Id") {
+          check = true;
+        }
+      }
+      if(check == true){
+        for (let key in item) {
+          if (key == "Id") {
+            break;
+          }
+          delete item[key];
+        }
+      }
+      
       console.log(item);
       if (!item) return;
       var x = item.Name;
@@ -325,8 +345,8 @@ class bookTab {
       if (Array.isArray(item)) { // проверка один или несколько елементов выбрано
         item.forEach(function(val){ // если несколько
           val.ch1 = 1; // нажатие чекбокса
-          //item.Name = x;
-          $$("bookTable").updateItem(val.id, item);
+          item.Name = x;
+          $$("bookTable").updateItem(val.id, val);
         });
         return;
       }
@@ -338,6 +358,7 @@ class bookTab {
 // функция после снятие выделения
     afterUnSelect(selection){
       var item = selection;
+      console.log(item);
       item.ch1 = 0; // снятие чекбокса
       if(!item.id) return;
       $$("bookTable").updateItem(item.id, item);
