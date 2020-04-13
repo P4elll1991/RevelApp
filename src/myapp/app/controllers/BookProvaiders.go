@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"time"
 
 	_ "github.com/lib/pq"
@@ -48,8 +49,11 @@ func (pr BookProvaider) AddBookPro(book Book) (err error) {
 // метод обновляющий данные о книгах
 
 func (pr BookProvaider) UpdateBookPro(bookUpdate Book) error {
-
-	bookUpdate.Datestart = time.Now()
+	check := fmt.Sprintf("%d", bookUpdate.Datestart.Year())
+	if check == "1" {
+		fmt.Println("TEEEEEESSSSTTTT  --- ", check)
+		bookUpdate.Datestart = time.Now()
+	}
 	err := pr.mapper.UpdateBook(bookUpdate)
 	if err != nil {
 		return err
